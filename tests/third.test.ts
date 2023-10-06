@@ -1,10 +1,10 @@
 import { assertEquals } from 'https://deno.land/std@0.125.0/testing/asserts.ts'
-import { validate, SchemaType } from '../mod.ts'
+import { Validate, SchemaType } from '../mod.ts'
 const schema: SchemaType = {
     name: String,
-    surname: { $type: String, $optional: true },
+    surname: { $schema: String, $optional: true },
     zipcode: /^[0-9]{5}(?:-[0-9]{4})?$/, //00000
-    zipcode2: { $type: String, $regex: /^[0-9]{5}(?:-[0-9]{4})?$/ }, //00000
+    zipcode2: { $schema: String, $optional: true, $regex: /^[0-9]{5}(?:-[0-9]{4})?$/ }, //00000
     fields: [String],
     fields1: [String, 5],
     fields2: [String, 1, 5],
@@ -12,7 +12,7 @@ const schema: SchemaType = {
         name: 3
     }],
     test: {
-        $type: {
+        $schema: {
             option: Boolean,
             option2: [Boolean]
         },
@@ -30,7 +30,7 @@ const schema: SchemaType = {
     a: {
         $or: [
             (value) => { console.log(2, value); return true },
-            async (value) => { console.log(1, value); return true },
+            (value) => new Promise(() => { console.log(1, value); return true }),
         ]
     },
     c: [[[String]]]
@@ -38,13 +38,14 @@ const schema: SchemaType = {
 Deno.test({
     name: '[Test 1]: testing',
     fn() {
-        assertEquals(validate(schema, ['uwu']), false)
+        assertEquals(Validate(schema, ['uwu']), false)
     }
 })
+
 Deno.test({
-    name: '[Test 1]: testing',
+    name: '[Test 2]: testing',
     async fn() {
-        assertEquals(await validate(schema, {
+        assertEquals(await Validate(schema, {
             name: 'mert',
             surname: 'hh',
             zipcode: '32454',
