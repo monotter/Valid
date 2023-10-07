@@ -59,8 +59,7 @@ export function Validate<Schema extends SchemaType, Result extends boolean | Pro
         if (Array.isArray(Schema)) {
             if (!(typeof Value === 'object' && Array.isArray(Value))) {
                 ReturnValue = false as Result
-            }
-            else {
+            } else {
                 const MaxAmount = (Schema.length >= 3 ? Schema[2] : Schema.length >= 2 ? Schema[1] : Infinity)!
                 const MinAmount = (Schema.length >= 3 ? Schema[1] : 0)!
                 if (Value.length > MaxAmount || Value.length < MinAmount) {
@@ -100,15 +99,16 @@ export function Validate<Schema extends SchemaType, Result extends boolean | Pro
                 const ValueKeys = Object.keys(Value)
                 if (Options.exact && ValueKeys.filter(ValueKey => !SchemaKeys.includes(ValueKey)).length > 0) {
                     ReturnValue = false as Result
-                }
-                const Results = SchemaKeys.map((SchemaKey) => {
-                    const _Schema = (Schema as ObjectType)[SchemaKey]
-                    return Validate(_Schema, Value[SchemaKey], GlobalOptions) as Result
-                }) as Result[]
-                if (Results.find(_Value => _Value instanceof Promise)) {
-                    ReturnValue = new Promise((Resolve) => Promise.all(Results).then((_Results: Result[]) => Resolve(_Results.every(Result => Result)))) as Result
                 } else {
-                    ReturnValue = Results.every(Result => Result) as Result
+                    const Results = SchemaKeys.map((SchemaKey) => {
+                        const _Schema = (Schema as ObjectType)[SchemaKey]
+                        return Validate(_Schema, Value[SchemaKey], GlobalOptions) as Result
+                    }) as Result[]
+                    if (Results.find(_Value => _Value instanceof Promise)) {
+                        ReturnValue = new Promise((Resolve) => Promise.all(Results).then((_Results: Result[]) => Resolve(_Results.every(Result => Result)))) as Result
+                    } else {
+                        ReturnValue = Results.every(Result => Result) as Result
+                    }
                 }
             }
         }
